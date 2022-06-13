@@ -1,0 +1,43 @@
+# Base CI job template for building and packaging Java app
+# Adapted from: https://gitlab.com/gitlab-examples/maven/simple-maven-app/-/blob/master/.gitlab-ci.yml
+.java-base:
+  image: maven:3.6.3-adoptopenjdk-11
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .m2/repository
+  variables:
+    # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
+    # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
+    MAVEN_OPTS: >-
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true
+    # As of Maven 3.3.0 instead of this you may define these options in `.mvn/maven.config` so the same config is used
+    # when running from the command line.
+    # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
+    MAVEN_CLI_OPTS: >-
+      --batch-mode
+      --errors
+      --fail-at-end
+      --show-version
+
+verify:
+  extends: .java-base
+  stage: test
+  services:
+    - postgres:11.8-alpine
+  variables:
+    POSTGRES_DB: sikerjasama_ci
+    POSTGRES_USER: sikerjasama_ci_user
+    POSTGRES_PASSWORD: sikerjasama_ci_password
+  script:
+    - echo "Skipping tests due to no tests"
+    - mvn $MAVEN_CLI_OPTS -DskipTests verify
+  artifacts:
+    paths:
+      - target/
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml

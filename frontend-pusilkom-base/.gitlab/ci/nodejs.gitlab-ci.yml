@@ -1,0 +1,30 @@
+# Base CI job template for building and packaging Vue.js app
+.nodejs-base:
+  image: node:12.18.3-alpine3.12
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - node_modules
+  variables:
+    BUILD_MODE: development
+    BACKEND_URL: http://localhost:8001
+  before_script:
+    - echo "VUE_APP_BACKEND_URL=${BACKEND_URL}" > .env
+
+.build-app:
+  extends: .nodejs-base
+  stage: build
+  script:
+    - npm install --progress=false
+    - npm run build -- --mode=$BUILD_MODE
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - dist
+
+lint:
+  extends: .nodejs-base
+  stage: test
+  script:
+    - npm install --progress=false
+    - npm run lint -- --max-errors 30

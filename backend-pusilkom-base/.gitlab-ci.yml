@@ -1,0 +1,19 @@
+# CI/CD configuration and jobs
+stages:
+  - test
+  - deploy
+
+include:
+  - local: .gitlab/ci/deploy.gitlab-ci.yml
+  - local: .gitlab/ci/java.gitlab-ci.yml
+
+deploy-app:develop:
+  extends: .deploy-app-base
+  variables:
+    DEPLOYER_PRIVATE_KEY: $DEVELOPMENT_DEPLOYER_PRIVATE_KEY
+    DEPLOYER_USER: $DEVELOPMENT_DEPLOYER_USER
+    ENVIRONMENT_NAME: develop
+    ENVIRONMENT_IP: $DEVELOPMENT_ENVIRONMENT_IP
+  only:
+    refs:
+      - develop@unhan/sikerjasama/backend

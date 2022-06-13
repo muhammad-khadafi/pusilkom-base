@@ -1,0 +1,34 @@
+# CI/CD configuration and jobs
+stages:
+  - build
+  - test
+  - deploy
+
+include:
+  - local: .gitlab/ci/deploy.gitlab-ci.yml
+  - local: .gitlab/ci/nodejs.gitlab-ci.yml
+
+build-app:dev:
+  extends: .build-app
+  variables:
+    BUILD_MODE: development
+    BACKEND_URL: $DEVELOPMENT_BACKEND_URL
+  only:
+    refs:
+      - branches@unhan/sikerjasama/frontend
+      - develop@unhan/sikerjasama/frontend
+  except:
+    refs:
+      - testing@unhan/sikerjasama/frontend
+      - master@unhan/sikerjasama/frontend
+
+deploy-app:dev:
+  extends: .deploy-base
+  variables:
+    DEPLOYER_PRIVATE_KEY: $DEVELOPMENT_DEPLOYER_PRIVATE_KEY
+    DEPLOYER_USER: $DEVELOPMENT_DEPLOYER_USER
+    ENVIRONMENT_NAME: develop
+    ENVIRONMENT_IP: $DEVELOPMENT_ENVIRONMENT_IP
+  only:
+    refs:
+      - develop@unhan/sikerjasama/frontend

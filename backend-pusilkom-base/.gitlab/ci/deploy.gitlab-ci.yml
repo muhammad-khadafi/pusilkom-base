@@ -1,0 +1,37 @@
+# CI/CD jobs to automate deployment
+.deploy-base:
+  image: alpine:3.12.0
+  stage: deploy
+  cache: {}
+  variables:
+    ENVIRONMENT_IP: 127.0.0.1
+    DEPLOYER_PRIVATE_KEY:
+    DEPLOYER_USER:
+  before_script:
+    - apk update
+    - 'which ssh-agent || ( apk update && apk add openssh-client rsync )'
+    - mkdir -p ~/.ssh
+    - eval $(ssh-agent -s)
+    - echo "${DEPLOYER_PRIVATE_KEY}" | ssh-add -
+    - ssh-keyscan -H "${ENVIRONMENT_IP}" >> ~/.ssh/known_hosts
+    - export TIMESTAMP="$(date +%Y%m%d%H%M%S)"
+    - ls target/
+  except:
+    refs:
+      - schedules
+
+.deploy-app-base:
+  extends: .deploy-base
+  script:
+    - ssh "${DEPLOYER_USER}@${ENVIRONMENT_IP}"
+      "mkdir -p /opt/unhan/sikerjasama/backend/${ENVIRONMENT_NAME}/releases/${TIMESTAMP}"
+    - rsync -rav target/*.jar
+      "${DEPLOYER_USER}@${ENVIRONMENT_IP}:/opt/unhan/sikerjasama/backend/${ENVIRONMENT_NAME}/releases/${TIMESTAMP}/"
+    - ssh "${DEPLOYER_USER}@${ENVIRONMENT_IP}"
+      "sudo systemctl stop backend-${ENVIRONMENT_NAME}.service"
+    - ssh "${DEPLOYER_USER}@${ENVIRONMENT_IP}"
+      "rm /opt/unhan/sikerjasama/backend/${ENVIRONMENT_NAME}/current/app.jar | true"
+    - ssh "${DEPLOYER_USER}@${ENVIRONMENT_IP}"
+      "cp /opt/unhan/sikerjasama/backend/${ENVIRONMENT_NAME}/releases/${TIMESTAMP}/*.jar /opt/unhan/sikerjasama/backend/${ENVIRONMENT_NAME}/current/app.jar"
+    - ssh "${DEPLOYER_USER}@${ENVIRONMENT_IP}"
+      "sudo systemctl start backend-${ENVIRONMENT_NAME}.service"

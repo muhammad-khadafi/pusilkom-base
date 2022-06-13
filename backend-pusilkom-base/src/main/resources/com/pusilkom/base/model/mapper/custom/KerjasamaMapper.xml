@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pusilkom.base.model.mapper.KerjasamaMapperDTO">
+    <resultMap id="BaseResultMap" type="com.pusilkom.base.model.Kerjasama">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="id_tipe_kerjasama" jdbcType="INTEGER" property="idTipeKerjasama" />
+        <result column="id_pihak_pertama" jdbcType="INTEGER" property="idPihakPertama" />
+        <result column="id_pihak_kedua" jdbcType="INTEGER" property="idPihakKedua" />
+        <result column="judul" jdbcType="VARCHAR" property="judul" />
+        <result column="deskripsi" jdbcType="VARCHAR" property="deskripsi" />
+        <result column="tanggal_perjanjian" jdbcType="TIMESTAMP" property="tanggalPerjanjian" />
+        <result column="tanggal_mulai" jdbcType="TIMESTAMP" property="tanggalMulai" />
+        <result column="tanggal_selesai" jdbcType="TIMESTAMP" property="tanggalSelesai" />
+    </resultMap>
+    <select id="getKerjasamaAktif" parameterType="map" resultMap="BaseResultMap">
+      select judul,tanggal_selesai from kerjasama
+      where ((tanggal_selesai = null) or (DATE(tanggal_selesai) >= current_date))
+    </select>
+</mapper>

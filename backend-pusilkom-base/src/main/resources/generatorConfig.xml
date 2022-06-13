@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+<!--    <classPathEntry location="C:/Users/PUSILKOM/.m2/repository/org/postgresql/postgresql/9.4.1212/postgresql-9.4.1212.jar" />-->
+    <!--path arief-->
+
+    <!--    <classPathEntry location="C:\Users\Lenovo\.m2\repository\postgresql\postgresql\9.4.1212.jre7\postgresql-9.4.1212.jre7.jar"/>-->
+    <!--path dafi-->
+     <classPathEntry location="C:/Users/muhammad.khadafi/.m2/repository/org/postgresql/postgresql/9.4.1212.jre7/postgresql-9.4.1212.jre7.jar" />
+    <!--    <classPathEntry location="C:/Users/muhammad.khadafi/.m2/repository/org/postgresql/postgresql/9.4.1212.jre7/postgresql-9.4.1212.jre7.jar" />-->
+    <!--    <classPathEntry location="C:\Users\PUSILKOM\.m2\repository\postgresql\postgresql\9.4.1212.jre7\postgresql-9.4.1212.jre7.jar"/>-->
+    <!--path sumi-->
+    <!--classPathEntry location="C:\Users\pusilkom\.m2\repository\postgresql\postgresql\9.1-901-1.jdbc4\postgresql-9.1-901-1.jdbc4.jar" /-->
+
+    <!--path wida-->
+<!--   <classPathEntry location="/home/pusilkom/.m2/repository/org/postgresql/postgresql/42.2.6/postgresql-42.2.6.jar" />-->
+    <context id="TheContext" targetRuntime="MyBatis3">
+        <plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"></plugin>
+
+        <commentGenerator>
+            <property name="suppressDate" value="true" />
+        </commentGenerator>
+
+        <jdbcConnection driverClass="org.postgresql.Driver"
+                        connectionURL="jdbc:postgresql://10.119.234.162:5432/sikerjasama_dev"
+                        userId="sikerjasama_dev"
+                        password="xo1AiGhohk0ahLoo">
+        </jdbcConnection>
+
+        <javaModelGenerator targetPackage="com.pusilkom.base.model" targetProject="src/main/java">
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="com.pusilkom.base.model.mapper" targetProject="src/main/resources">
+        </sqlMapGenerator>
+
+        <table tableName="dokumen_kerjasama" domainObjectName="DokumenKerjasama"
+               modelType="flat"
+               enableDeleteByExample="true"
+               enableUpdateByExample="true"
+               selectByPrimaryKeyQueryId="true"
+               selectByExampleQueryId="true">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="JDBC" identity="true"/>
+        </table>
+
+        <!--Running Command-->
+        <!--mvn -Dmybatis.generator.overwrite=true mybatis-generator:generate-->
+
+    </context>
+</generatorConfiguration>

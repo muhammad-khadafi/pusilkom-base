@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pusilkom.base.model.mapper.LaporanMapper">
+    <resultMap id="LaporanResultMap" type="com.pusilkom.base.dto.LaporanDTO">
+        <result column="grouping" jdbcType="VARCHAR" property="grouping" />
+        <result column="periode" jdbcType="VARCHAR" property="periode" />
+        <result column="jumlah" jdbcType="INTEGER" property="jumlah" />
+    </resultMap>
+
+    <select id="getLaporanPerTipeKerjasama" parameterType="map" resultMap="LaporanResultMap">
+      select tk.nama as grouping, periode, jumlah from (
+         select id_tipe_kerjasama, periode, count(id) as jumlah from (
+            select id_tipe_kerjasama, extract(year from tanggal_perjanjian) as periode, id from kerjasama
+
+         ) a
+         group by id_tipe_kerjasama, periode
+      ) b
+      inner join tipe_kerjasama tk on tk.id = b.id_tipe_kerjasama
+      order by periode desc, tk.id asc
+    </select>
+
+    <select id="getLaporanPerTipeInstitusi" parameterType="map" resultMap="LaporanResultMap">
+     select t.nama as grouping, uni.periode, sum(uni.jumlah) as jumlah from(
+      	select institusi, periode, count(id) as jumlah from (
+            select id_pihak_kedua as institusi, extract(year from tanggal_perjanjian) as periode, id from kerjasama
+         ) b
+         group by institusi, periode
+         ) uni
+
+         inner join institusi i
+         on i.id = uni.institusi
+         inner join tipe_institusi t
+         on t.id = i.id_tipe_institusi
+         group by t.nama, periode
+         order by grouping asc
+    </select>
+    <select id="getLaporanPerNegara" parameterType="map" resultMap="LaporanResultMap">
+    select n.nama as grouping, uni.periode, sum(uni.jumlah) as jumlah from(
+    select institusi, periode, count(id) as jumlah from (
+    select id_pihak_kedua as institusi, extract(year from tanggal_perjanjian) as periode, id from kerjasama
+    ) b
+    group by institusi, periode
+    ) uni
+
+    inner join institusi i
+    on i.id = uni.institusi
+    inner join negara n
+    on i.id_negara = n.id
+    group by n.nama, periode
+    order by grouping asc
+    </select>
+</mapper>

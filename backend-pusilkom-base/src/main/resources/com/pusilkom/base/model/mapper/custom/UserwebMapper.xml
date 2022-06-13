@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pusilkom.base.model.mapper.UserwebMapper">
+    <resultMap id="RoleResult" type="com.pusilkom.base.model.Role">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="role_code" jdbcType="VARCHAR" property="roleCode"/>
+        <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
+    </resultMap>
+    <resultMap id="UserwebResult" type="com.pusilkom.base.model.Userweb">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="last_login" jdbcType="TIMESTAMP" property="lastLogin" />
+    </resultMap>
+    <resultMap id="UserwebDTOResult" type="com.pusilkom.base.dto.UserwebDTO">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="kode_sso" jdbcType="VARCHAR" property="kodeSso" />
+        <result column="username" jdbcType="VARCHAR" property="username" />
+        <result column="password" jdbcType="VARCHAR" property="password" />
+        <result column="last_login" jdbcType="TIMESTAMP" property="lastLogin" />
+        <result column="last_logout" jdbcType="TIMESTAMP" property="lastLogout" />
+        <result column="foto" jdbcType="VARCHAR" property="foto" />
+        <result column="nip" jdbcType="VARCHAR" property="nip" />
+        <result column="nama" jdbcType="VARCHAR" property="nama" />
+        <result column="email" jdbcType="VARCHAR" property="email" />
+        <result column="is_active" jdbcType="BIT" property="isActive" />
+        <result column="id_institusi" jdbcType="INTEGER" property="idInstitusi" />
+        <result column="foto_name" jdbcType="VARCHAR" property="fotoName" />
+        <result column="institusi" jdbcType="VARCHAR" property="institusi" />
+    </resultMap>
+
+    <select id="getRoleByUsername" resultMap="RoleResult" parameterType="map">
+        select r.* from userweb_has_role uhr
+        join userweb u on uhr.id_userweb = u.id
+        join role r on uhr.id_role = r.id
+        where u.username = #{username}
+    </select>
+
+    <select id="getRolesByUsername" resultMap="RoleResult" parameterType="map">
+        select r.* from userweb_has_role uhr
+        join userweb u on uhr.id_userweb = u.id
+        join role r on uhr.id_role = r.id
+        where u.username = #{username}
+        order by role_name
+    </select>
+    <select id="getUserwebisNotPeneliti" resultMap="UserwebResult" parameterType="map">
+        select u.id, u.username
+        from userweb u
+        left join peneliti p on p.id_user = u.id
+        where p.id_user is null and u.is_active = true and u.id_organisasi = #{idOrganisasi}
+    </select>
+
+    <select id="selectSuperAdmin" resultMap="UserwebResult">
+        select u.id, u.username from userweb_has_role uhr
+        join "role" r on uhr.id_role = r.id
+        join userweb u on u.id = uhr.id_userweb
+        where r.role_name = 'Super Admin'
+    </select>
+
+    <select id="getUserwebList" resultMap="UserwebDTOResult" parameterType="map">
+        select u.id, u.kode_sso, username, u.nama, nip , u.email , i.nama as institusi , is_active, u.id_institusi, u.foto_name
+        from userweb u
+        join institusi i on u.id_institusi = i.id
+        order by u.nama
+    </select>
+
+    <select id="getUserwebList2" resultMap="UserwebDTOResult" parameterType="map">
+        select u.id, username, u.nama, nip , nitk , nidn , u.email , o.nama as organisasi , is_active
+        from userweb u
+        join organisasi o on u.id_organisasi = o.id
+        <where>
+            <if test="organizationId != 1">
+                AND u.id_organisasi = #{organizationId}
+            </if>
+            <if test="roleCode != 'ADMIN'">
+                AND u.id not in (select u.id from userweb_has_role uhr
+                join "role" r on uhr.id_role = r.id
+                join userweb u on u.id = uhr.id_userweb
+                where r.role_name = 'Super Admin')
+            </if>
+        </where>
+        order by u.username
+    </select>
+
+    <select id="getUserLoginList" resultMap="UserwebDTOResult">
+        select id, username, last_login from userweb u where (last_login > last_logout) or (last_logout is null and last_login is not null)
+    </select>
+
+    <select id="getProfilPengguna" resultMap="UserwebDTOResult" parameterType="map">
+        select u.kode_sso, u.username, u.last_login , u.last_logout , u.nip,u.nama, u.email , i.nama as institusi from userweb u
+        join institusi i on u.id_institusi = i.id
+        where u.id = #{idUser}
+    </select>
+</mapper>
